@@ -2,7 +2,7 @@ const express=require("express");
 const cors=require('cors');
 const zod=require("zod");
 const jwt=require("jsonwebtoken");
-const {user}=require("../db");
+const {user,account}=require("../db");
 const jwtpass=require("../config");
 const {authMiddleware}=require('../middleware');
 const userrouter=express.Router();
@@ -20,6 +20,14 @@ const updateBody = zod.object({
 console.log("jwt pass: " ,jwtpass );
 userrouter.use(express.json());
 userrouter.use(cors());
+userrouter.get('/check',authMiddleware,(req,res)=>{
+
+        console.log(req.userId);
+        res.json({value:true,userid:req.userId});
+    
+
+
+});
 userrouter.post('/signup',async (req,res)=>{
     let obj=req.body;
     console.log("obj: ",obj);
@@ -32,14 +40,20 @@ userrouter.post('/signup',async (req,res)=>{
         })
         if(!verdict)
         {
-            let create=await user.create({
+            try{
+            let create1=await user.create({
                 username:obj.username,
                 password:obj.password,
                 firstname:obj.firstname,
                 lastname:obj.lastname
             })
-            let token=jwt.sign({username:obj.username},jwtpass);
-            if(create._id)
+            
+                let create2=await account.create({
+                    id:create1._id,
+                    amount:Math.floor(Math.random()*10000)
+                });
+                let token=jwt.sign({username:obj.username},jwtpass);
+            if(create1._id)
             {
                 res.json({
                     message: "User created successfully",
@@ -47,22 +61,20 @@ userrouter.post('/signup',async (req,res)=>{
                     send:true
                 });
             }
-            else
-            {
-                res.json({message:"server busy please try again",send:false});
             }
-        }
-        else{
-            res.json({message:"user already available"});
-        }
-
+            catch(e)
+            {
+                    console.log(e);
+                    res.json({message:"server busy please try again",send:false});
+            }
+            
     }
     else{
         res.status(411).json({
             message: "Email already taken / Incorrect inputs"
         })
     }
-})
+}})
 userrouter.post('/signin',async (req,res)=>{
     let obj=req.body;
     let verdict=await user.findOne({
@@ -106,5 +118,44 @@ userrouter.get('/',async (req,res)=>{
     let result= await user.find().exec();
     console.log(result);
     res.send(result);
+});
+userrouter.get('/amount',async(req,res)=>{
+    let userid=req.headers.username;
+    let result=await user.findOne({username:userid});
+    if(result._id)
+    {
+        let result2=await account.findOne({id:result._id});
+        console.log("-------->",result2);
+        res.json({amount:result2.amount,id:result._id});
+    }
+    else
+    {
+        res.status(500).json({msg:"error at  server"});
+    }
+});
+userrouter.post('/send',async (req,res)=>{
+    let senderid=req.body.senderid;
+    let receiverid=req.body.receiverid;
+    let amt=req.body.amount;
+    try{
+        let val1=await account.findOne({id:senderid});
+        let value=await user.findById(senderid);
+        if(val1.amount>=amt)
+        {
+             let val2=await account.findOne({id:receiverid});
+             let op1=await account.findOneAndUpdate({id:senderid},{ $inc: { amount: -amt } });
+             let op2=await account.findOneAndUpdate({id:receiverid},{ $inc: { amount: +amt } });
+             res.json({value:"successfull",username:value.username});
+        }
+        else{
+            res.json({err:"insufficent balance"});
+        }
+
+    }
+    catch(err)
+    {
+        res.json({err:"error at server"});
+        console.error(err);
+    }
 })
 module.exports=userrouter;

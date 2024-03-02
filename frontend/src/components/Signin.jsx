@@ -1,5 +1,6 @@
 import { useState,useEffect } from "react";
 import {Routes,Route, useNavigate,useParams } from "react-router-dom";
+import check from "./check";
 export default function Signup()
 {
    let navigate= useNavigate();
@@ -19,6 +20,16 @@ export default function Signup()
         })
     }
     console.log("state: ",value);
+    useEffect(()=>{
+        check().then((result)=>{
+            console.log("result: ", result);
+        if(result.value)
+        {
+            navigate(`/${result.userid}/dashboard`);
+        }
+        })
+        
+    },[])
     useEffect(()=>{
         if(value.isyes)
         {
