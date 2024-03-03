@@ -13,7 +13,9 @@ export default function Dashboard()
     const {user}=useParams();
     const [userid,setUserid]=useState("");
     useEffect(()=>{
-        fetch("http://localhost:3000/api/v1/user/")
+        fetch("http://localhost:3000/api/v1/user/",{
+            headers:{username:user}
+        })
         .then(async (data)=>{
             let values=await data.json();
             setData(values);

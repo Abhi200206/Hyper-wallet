@@ -1,6 +1,7 @@
 const express=require("express");
 const cors=require('cors');
 const zod=require("zod");
+const mongoose=require('mongoose');
 const jwt=require("jsonwebtoken");
 const {user,account}=require("../db");
 const jwtpass=require("../config");
@@ -115,9 +116,15 @@ userrouter.put('/:name',authMiddleware,async (req,res)=>{
     
 })
 userrouter.get('/',async (req,res)=>{
+    let username=req.headers.username;
     let result= await user.find().exec();
-    console.log(result);
-    res.send(result);
+    let final_arr=result.filter((x)=>{
+        if(x.username!=username)
+        {
+            return x;
+        }
+    })
+    res.send(final_arr);
 });
 userrouter.get('/amount',async(req,res)=>{
     let userid=req.headers.username;
@@ -134,26 +141,33 @@ userrouter.get('/amount',async(req,res)=>{
     }
 });
 userrouter.post('/send',async (req,res)=>{
+    //using transactions
+    const session = await mongoose.startSession();
     let senderid=req.body.senderid;
     let receiverid=req.body.receiverid;
     let amt=req.body.amount;
     try{
+        session.startTransaction();
         let val1=await account.findOne({id:senderid});
         let value=await user.findById(senderid);
         if(val1.amount>=amt)
         {
+
              let val2=await account.findOne({id:receiverid});
              let op1=await account.findOneAndUpdate({id:senderid},{ $inc: { amount: -amt } });
              let op2=await account.findOneAndUpdate({id:receiverid},{ $inc: { amount: +amt } });
+             await session.commitTransaction();
              res.json({value:"successfull",username:value.username});
         }
         else{
+            await session.abortTransaction();
             res.json({err:"insufficent balance"});
         }
 
     }
     catch(err)
     {
+        await session.abortTransaction();
         res.json({err:"error at server"});
         console.error(err);
     }
