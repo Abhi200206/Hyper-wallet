@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {Routes,Route, useNavigate,useParams } from "react-router-dom";
 import Renderusers from "./Renderusers";
+import check from './check'
 export default function Dashboard()
 {
     let navigate=useNavigate()
@@ -12,6 +13,16 @@ export default function Dashboard()
     let [data,setData]=useState([]);
     const {user}=useParams();
     const [userid,setUserid]=useState("");
+    useEffect(()=>{
+        let bool=check();
+        bool.then((val)=>{
+          console.log("bool val: ",val.value);
+        if(!val.value)
+        {
+            navigate('/signin');
+        }
+        })
+      },[])
     useEffect(()=>{
         fetch("http://localhost:3000/api/v1/user/",{
             headers:{username:user}

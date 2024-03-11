@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {  useNavigate, useSearchParams } from "react-router-dom";
+import check from "./check";
 export default function Send()
 {
     let navigate=useNavigate();
@@ -9,6 +10,16 @@ export default function Send()
     let name=searchParams.get("name");
     let sendid=searchParams.get("sid");
     let id=searchParams.get("id"); 
+    useEffect(()=>{
+        let bool=check();
+        bool.then((val)=>{
+          console.log("bool val: ",val.value);
+        if(!val.value)
+        {
+            navigate('/signin');
+        }
+        })
+      },[]);
     useEffect(()=>{
         if(val)
         {
