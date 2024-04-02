@@ -1,6 +1,6 @@
 ### clone the repository locally
 # Running locally
-1. clone the repository locally and open in a editor
+1. fork and clone the repository locally and open in a editor. 
 # Running frontend
 1. open frontend folder
 2. run "npm install"
