@@ -1,6 +1,7 @@
 const mongoose=require("mongoose");
 const { number } = require("zod");
-mongoose.connect("mongodb+srv://vikkymsd777:TAm6HPFXUd4FIJig@cluster0.xpoedji.mongodb.net/paytm");
+//add the mongodb connection url using .env
+mongoose.connect();
 const uschema= new mongoose.Schema({
     username:String,
     firstname:String,
