@@ -47,7 +47,7 @@ Hyper Wallet is a web application that allows users to send money to each other 
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and create a pull request with your changes.
+CContributing are welcome! Please fork the repository and create a pull request with your changes.
 
 1. Fork the repository
 2. Create a new branch (`git checkout -b feature-branch`)
