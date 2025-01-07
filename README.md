@@ -1,4 +1,4 @@
-# Hyper Wallet
+# Hyper Wallet (js)
 
 Hyper Wallet is a web application that allows users to send money to each other securely. Built with React, TailwindCSS, JavaScript, Node.js, and Express.js, it features JWT authentication and input validation using Zod to ensure data integrity and security.
 
